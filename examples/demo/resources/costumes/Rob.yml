@@ -1,0 +1,22 @@
+type: costume
+compression: none
+data:
+  sprites:
+    sheet: rob.png
+    width: 53
+    height: 70
+  animations:
+    - action: idle
+      dir: down
+      frames:
+      - row: 0
+        columns: [0]
+        duration: 1000
+
+    - action: speak
+      dir: down
+      frames:
+      - row: 1
+        columns: [0,1,2,3]
+        duration: 100
+

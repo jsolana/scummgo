@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: police-line.png
+  frames:
+    width: 33
+    height: 22

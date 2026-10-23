@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: access-control.png
+  frames:
+    width: 25
+    height: 30

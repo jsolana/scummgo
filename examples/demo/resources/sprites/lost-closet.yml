@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: lost-closet.png
+  frames:
+    width: 45
+    height: 32

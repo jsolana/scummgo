@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: basement-lights.png
+  frames:
+    width: 500
+    height: 144

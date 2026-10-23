@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: microwave.png
+  frames:
+    width: 18
+    height: 11

@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: toilet-flushing.png
+  frames:
+    width: 40
+    height: 40

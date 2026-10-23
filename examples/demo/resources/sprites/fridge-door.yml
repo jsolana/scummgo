@@ -1,0 +1,7 @@
+type: spritesheet
+compression: none
+data:
+  source: fridge-door.png
+  frames:
+    width: 25
+    height: 52
