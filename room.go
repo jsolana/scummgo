@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"slices"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 // RoomCameraSpeed is the speed at which the camera moves in the room.
@@ -90,8 +92,15 @@ func (r *Room) Draw(frame *Frame) {
 		item.Draw(frame)
 	}
 
-	if frame.DebugEnabled && r.wbmatrix != nil {
-		r.wbmatrix.Draw()
+	if frame.DebugEnabled {
+		if r.wbmatrix != nil {
+			r.wbmatrix.Draw()
+		}
+		for _, obj := range r.objects {
+			if obj.IsVisible() && !obj.Hotspot.IsZero() {
+				rl.DrawRectangleLinesEx(obj.Hotspot.toRaylib(), 1, rl.NewColor(0x55, 0xFF, 0xFF, 0x7D))
+			}
+		}
 	}
 }
 
