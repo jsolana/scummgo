@@ -22,6 +22,9 @@ and the player's inventory.
 
 > ⚠️ This is still work in progress.
 
+This framework starts from the work done in
+[rvrt-win](https://github.com/retroverb/rvrt-win/).
+
 ## Requirements
 
 - Go 1.25+
