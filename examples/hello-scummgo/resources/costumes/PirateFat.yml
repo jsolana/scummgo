@@ -1,0 +1,20 @@
+type: costume
+compression: none
+data:
+  sprites:
+    sheet: PirateFat.png
+    width: 28
+    height: 42
+  animations:
+    - action: idle
+      dir: right
+      frames:
+      - row: 0
+        columns: [0]
+        duration: 1000
+    - action: speak
+      dir: right
+      frames:
+      - row: 0
+        columns: [0]
+        duration: 1000

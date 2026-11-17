@@ -4,10 +4,29 @@ common = import("resources:scripts/common")
 melee = decl.melee
 guybrush = common.guybrush
 
-pirates = actor {
+barrel = actor {
     name = "men of low moral fiber (pirates)",
-    size = size {w=60, h=64},
+    costume = ref("resources:costumes/PirateBarrel"),
+    size = size {w=36, h=44},
     talkcolor = common.magenta,
+    usepos = pos {x=90, y=128},
+    usedir = LEFT
+}
+
+fat = actor {
+    name = "men of low moral fiber (pirates)",
+    costume = ref("resources:costumes/PirateFat"),
+    size = size {w=28, h=42},
+    talkcolor = common.yellow,
+    usepos = pos {x=90, y=128},
+    usedir = LEFT
+}
+
+tall = actor {
+    name = "men of low moral fiber (pirates)",
+    costume = ref("resources:costumes/PirateTall"),
+    size = size {w=24, h=46},
+    talkcolor = common.cyan,
     usepos = pos {x=90, y=128},
     usedir = LEFT
 }
@@ -15,10 +34,9 @@ pirates = actor {
 function melee:enter()
     melee.box4:disable()
 
-    pirates:show {
-        pos = pos {x=38, y=137},         
-        lookat = RIGHT,
-    }
+    barrel:show { pos = pos {x=22, y=138}, lookat = RIGHT }
+    fat:show { pos = pos {x=46, y=128}, lookat = RIGHT }
+    tall:show { pos = pos {x=62, y=124}, lookat = RIGHT }
 
     guybrush:show {
         pos = pos {x=340, y=140}, 
@@ -31,12 +49,12 @@ function melee:enter()
         guybrush:walkto(pos {x=210, y=140}):wait()
     
         guybrush:say("Hello, I'm Guybrush Threepwood,\nmighty pirate!"):wait()
-        pirates:say("**Oh no! This guy again!**")
+        fat:say("**Oh no! This guy again!**")
         guybrush:walkto(pos{x=120, y=140}):wait()
         guybrush:say("I think I've lost the keys to my boat."):wait()
         guybrush:say("Have you seen any keys?"):wait()
         sleep(1000)
-        pirates:say("Eeerrrr... Nope!"):wait()
+        tall:say("Eeerrrr... Nope!"):wait()
         sleep(1000)
         
         common.music2:play()
@@ -55,11 +73,11 @@ function melee:enter()
         guybrush:walkto(pos{x=360, y=140}):wait()
         sleep(1000)
         
-        pirates:say("Oh, Jesus! I though he would\ntell again that stupid\ntale about LeChuck!"):wait()
+        fat:say("Oh, Jesus! I though he would\ntell again that stupid\ntale about LeChuck!"):wait()
         sleep(5000)
-        pirates:say("Who has the keys?", { color = common.yellow }):wait()
+        barrel:say("Who has the keys?"):wait()
         sleep(1000)
-        pirates:say("Me!")
+        tall:say("Me!")
         sleep(2000)
         end 
     )
@@ -84,7 +102,7 @@ function melee.bucket:lookat()
 end
 
 function melee.bucket:give(to)
-    if to == pirates then
+    if to == barrel or to == fat or to == tall then
         guybrush:say("I'd rather not. I am afraid\nthey'd get attached to it.")
     else
         DEFAULT.give(self)
@@ -103,8 +121,8 @@ end
 function melee.bucket:use(on)
     if on == melee.clock then
         guybrush:say("Time flies, but I don't think\nI can gather it in the bucket.")
-    elseif on == pirates then
-        melee.bucket:give(pirates)
+    elseif on == barrel or on == fat or on == tall then
+        melee.bucket:give(barrel)
     else
         DEFAULT.use(self, on)
     end
@@ -122,12 +140,16 @@ function melee.clock:turnoff()
     guybrush:say("Well, I guess I couldn't be more off"):wait()
 end
 
-function pirates:lookat() 
+local function lookatpirates()
     guybrush:say("They didn't move since I arrived\nin Monkey Island I."):wait()
     guybrush:say("I guess they are waiting for\nsomething..."):wait()
 end
 
-function pirates:talkto()
+function barrel:lookat() lookatpirates() end
+function fat:lookat() lookatpirates() end
+function tall:lookat() lookatpirates() end
+
+local function talktopirates()
     while true do
         local choice = CONTROL:sentencechoice()
         choice:add("Hello, guys! Are you really\nsure you don't have the keys?")
@@ -136,21 +158,18 @@ function pirates:talkto()
         choice:add("I think I will go to the Scumm bar. See you!")
         local s = choice:waitsay()
         if s == 1 then
-            pirates:say("Yes, we are sure!"):wait()
-            pirates:say(
-                "If we had them, we\nwould have left\nthis place long ago!",
-                { color = common.yellow }
-            ):wait()
-            pirates:say("For sure!"):wait()
+            barrel:say("Yes, we are sure!"):wait()
+            fat:say("If we had them, we\nwould have left\nthis place long ago!"):wait()
+            tall:say("For sure!"):wait()
         end
         if s == 2 then
-            pirates:say("No, we don't have them!"):wait()
-            pirates:say("And no, you don't know us!", { color = common.yellow }):wait()
+            tall:say("No, we don't have them!"):wait()
+            barrel:say("And no, you don't know us!"):wait()
         end
         if s == 3 then
-            pirates:say("Yes, we know it! You killed LeChuck"):wait()
-            pirates:say("You are a real hero", { color = common.yellow }):wait()
-            pirates:say("**Oh, Jesus!**"):wait()
+            fat:say("Yes, we know it! You killed LeChuck"):wait()
+            tall:say("You are a real hero"):wait()
+            barrel:say("**Oh, Jesus!**"):wait()
         end
         if s == 4 then
             CONTROL:paneon()
@@ -158,3 +177,7 @@ function pirates:talkto()
         end
     end
 end
+
+function barrel:talkto() talktopirates() end
+function fat:talkto() talktopirates() end
+function tall:talkto() talktopirates() end

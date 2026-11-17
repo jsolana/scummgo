@@ -4,6 +4,7 @@
 export { 
     magenta = color { r = 0xAA, g = 0x00, b = 0xAA },
     yellow = color { r = 0xFF, g = 0xFF, b = 0x55 },
+    cyan = color { r = 0x55, g = 0xFF, b = 0xFF },
     white = color { r = 0xFF, g = 0xFF, b = 0xFF },
 }
 
