@@ -18,7 +18,7 @@ export {
                     pos {x=230, y=100}, 
                     pos {x=100, y=100},
                 }, 
-                scale = 0.95,
+                scale = 12/16,
             },
 	        box2 = walkbox {
                 vertices = { 
@@ -27,26 +27,25 @@ export {
                     pos {x=215, y=90}, 
                     pos {x=115, y=90}
                 }, 
-                scale = 0.8,
+                scale = 8/16,
             },
 	        box3 = walkbox {
-                vertices = { 
-                    pos {x=115, y=90}, 
-                    pos {x=215, y=90}, 
-                    pos {x=197, y=82}, 
-                    pos {x=128, y=82},
+                vertices = {
+                    pos {x=150, y=90}, 
+                    pos {x=170, y=90}, 
+                    pos {x=166, y=80}, 
+                    pos {x=154, y=80},
                 }, 
-                scale = 0.6,
-                enabled = false,
+                scale = 5/16,
             },
 	        box4 = walkbox {
                 vertices = {
-                    pos {x=155, y=82}, 
-                    pos {x=165, y=82}, 
-                    pos {x=165, y=75}, 
-                    pos {x=155, y=75},
+                    pos {x=154, y=80}, 
+                    pos {x=166, y=80}, 
+                    pos {x=163, y=75}, 
+                    pos {x=157, y=75},
                 }, 
-                scale = 0.3,
+                scale = 2/16,
             },
         },
         bucket = object {

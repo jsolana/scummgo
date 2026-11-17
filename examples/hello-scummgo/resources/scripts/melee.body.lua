@@ -32,7 +32,6 @@ tall = actor {
 }
 
 function melee:enter()
-    melee.box4:disable()
 
     barrel:show { pos = pos {x=22, y=138}, lookat = RIGHT }
     fat:show { pos = pos {x=46, y=128}, lookat = RIGHT }
