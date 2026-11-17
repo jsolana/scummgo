@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/banner.png" alt="A retro SCUMM-style screen: a haunted mansion at night, two characters, the twelve verbs and an inventory with a Go launcher, Lua scripts and YAML assets" width="640">
+</p>
+
 # scummgo — Point & Click Adventure Toolkit
 
 **scummgo** is a toolkit for creating classic *point & click* graphic adventures
