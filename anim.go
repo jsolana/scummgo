@@ -95,7 +95,7 @@ func (a *Animation) Played() bool {
 }
 
 // Draw renders the animation in the viewport.
-func (a *Animation) Draw(sprites *SpriteSheet, pos Position) {
+func (a *Animation) Draw(sprites *SpriteSheet, pos Position, scale float32) {
 	if a == nil {
 		return
 	}
@@ -113,6 +113,7 @@ func (a *Animation) Draw(sprites *SpriteSheet, pos Position) {
 		a.frames[a.currentFrame].row,
 		pos,
 		a.flip,
+		scale,
 	)
 }
 

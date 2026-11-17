@@ -119,7 +119,7 @@ func (a *Actor) Draw(frame *Frame) {
 
 // Hotspot returns the hotspot of the actor.
 func (a *Actor) Hotspot() Rectangle {
-	return Rectangle{Pos: a.costumePos(), Size: a.Size}
+	return Rectangle{Pos: a.costumePos(), Size: a.Size.Scale(a.scale())}
 }
 
 // FindCallback returns the callback with the given name.
@@ -177,13 +177,22 @@ func (a *Actor) ItemUsePosition() (Position, Direction) {
 	return a.UsePos, a.UseDir
 }
 
+// scale returns the scale factor at the position of the actor.
+func (a *Actor) scale() float32 {
+	if a.Room == nil || a.Room.wbmatrix == nil {
+		return 1
+	}
+	return a.Room.wbmatrix.ScaleAt(a.pos)
+}
+
 func (a *Actor) costumePos() Position {
-	pos := a.pos.ToPos().Sub(NewPos((a.Size.W / 2), a.Size.H-a.Elev))
-	return pos
+	s := a.scale()
+	size := a.Size.Scale(s)
+	return a.pos.ToPos().Sub(NewPos(size.W/2, size.H-int(float32(a.Elev)*s+0.5)))
 }
 
 func (a *Actor) dialogPos() Position {
-	return a.costumePos().Above(a.Size.H)
+	return a.costumePos().Above(a.Size.Scale(a.scale()).H)
 }
 
 // Action is an action that an actor is performing.
@@ -203,7 +212,7 @@ func Standing(dir Direction) *Action {
 				costume = CostumeSpeak(dir)
 			}
 			if cos := a.costume; cos != nil {
-				cos.draw(costume, a.costumePos())
+				cos.draw(costume, a.costumePos(), a.scale())
 			}
 		},
 	}
@@ -223,7 +232,7 @@ func Playing(name string) *Action {
 				anim = a.costume.custom[name]
 				anim.Reset()
 			}
-			anim.Draw(a.costume.sprites, a.costumePos())
+			anim.Draw(a.costume.sprites, a.costumePos(), a.scale())
 			if anim.Played() {
 				done.Complete()
 			}
@@ -249,7 +258,7 @@ func WalkingTo(w []*WayPoint, app *App) *Action {
 			currentTarget := w[0].Position
 
 			if cos := a.costume; cos != nil {
-				cos.draw(CostumeWalk(a.lookAt), a.costumePos())
+				cos.draw(CostumeWalk(a.lookAt), a.costumePos(), a.scale())
 			}
 
 			if a.pos.ToPos() == currentTarget {
@@ -264,7 +273,7 @@ func WalkingTo(w []*WayPoint, app *App) *Action {
 			}
 
 			a.lookAt = a.pos.ToPos().DirectionTo(currentTarget)
-			a.pos = a.pos.Move(currentTarget.ToPosf(), a.speed.Scale(rl.GetFrameTime()))
+			a.pos = a.pos.Move(currentTarget.ToPosf(), a.speed.Scale(rl.GetFrameTime()*a.scale()))
 		},
 	}
 }
@@ -275,7 +284,7 @@ func SpeakingTo(dialog Future) *Action {
 		prom: NewPromise(),
 		f: func(f *Frame, a *Actor, done *Promise) {
 			if cos := a.costume; cos != nil {
-				cos.draw(CostumeSpeak(a.lookAt), a.costumePos())
+				cos.draw(CostumeSpeak(a.lookAt), a.costumePos(), a.scale())
 			}
 			if dialog.IsCompleted() {
 				done.Complete()

@@ -55,6 +55,56 @@ func TestNewWalkBox(t *testing.T) {
 
 }
 
+func TestWalkBoxScale(t *testing.T) {
+	vertices := [4]scummgo.Position{{X: 0, Y: 0}, {X: 4, Y: 0}, {X: 4, Y: 4}, {X: 0, Y: 4}}
+
+	testCases := []struct {
+		name     string
+		scale    float32
+		expected float32
+	}{
+		{name: "Full size is kept", scale: 1, expected: 1},
+		{name: "Multiples of 1/16 are kept", scale: 13.0 / 16, expected: 13.0 / 16},
+		{name: "Scale is rounded down to the nearest 1/16", scale: 0.95, expected: 15.0 / 16},
+		{name: "Scale is rounded up to the nearest 1/16", scale: 0.3, expected: 5.0 / 16},
+		{name: "Scale never goes below 1/16", scale: 0, expected: 1.0 / 16},
+		{name: "Scale can be bigger than one", scale: 1.5, expected: 1.5},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			wb := scummgo.NewWalkBox(DefaultWalkBoxID, vertices, testCase.scale)
+			assert.Equal(t, testCase.expected, wb.Scale())
+		})
+	}
+}
+
+func TestWalkBoxMatrixScaleAt(t *testing.T) {
+	far := scummgo.NewWalkBox("far", [4]scummgo.Position{{X: 0, Y: 0}, {X: 10, Y: 0}, {X: 10, Y: 30}, {X: 0, Y: 30}}, 4.0/16)
+	near := scummgo.NewWalkBox("near", [4]scummgo.Position{{X: 0, Y: 30}, {X: 10, Y: 30}, {X: 10, Y: 60}, {X: 0, Y: 60}}, 1)
+	matrix := scummgo.NewWalkBoxMatrix([]*scummgo.WalkBox{far, near})
+
+	testCases := []struct {
+		name     string
+		y        float32
+		expected float32
+	}{
+		{name: "Far from the shared edge the scale of the box is used", y: 45, expected: 1},
+		{name: "Far from the shared edge in the other box", y: 5, expected: 4.0 / 16},
+		{name: "On the shared edge the scale is the middle value", y: 30.5, expected: 10.0 / 16},
+		{name: "Close to the shared edge the scale is blended", y: 35, expected: 13.0 / 16},
+		{name: "At the end of the blending area the scale of the box is used", y: 40, expected: 1},
+		{name: "Blending also happens in the other box", y: 25, expected: 7.0 / 16},
+		{name: "The edges not shared with other boxes do not blend", y: 60, expected: 1},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expected, matrix.ScaleAt(scummgo.NewPosf(5, testCase.y)))
+		})
+	}
+}
+
 func TestFindPath(t *testing.T) {
 	/*
 		Polygons disposition:

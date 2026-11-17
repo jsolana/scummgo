@@ -254,6 +254,11 @@ func (s Size) String() string {
 	return fmt.Sprintf("(W:%d, H:%d)", s.W, s.H)
 }
 
+// Scale returns the size scaled by f, rounded to whole pixels.
+func (s Size) Scale(f float32) Size {
+	return Size{W: int(float32(s.W)*f + 0.5), H: int(float32(s.H)*f + 0.5)}
+}
+
 func (s Size) FlipH() Size {
 	return Size{W: -s.W, H: s.H}
 }

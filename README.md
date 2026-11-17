@@ -226,7 +226,7 @@ hall = room {
                 pos {x=305, y=117},
                 pos {x=10,  y=117},
             },
-            scale = 1,             -- depth scaling (0..1), 1 = full size
+            scale = 1,             -- depth scaling, 1 = full size (see below)
         },
     },
     door_elevator = object {       -- hotspot-only object (no sprites)
@@ -241,7 +241,17 @@ export { room = hall }
 ```
 
 - **Walkboxes** are convex quads that define walkable floor. Actors walk
-  through the graph of boxes; `scale` shrinks the actor for perspective.
+  through the graph of boxes; `scale` shrinks the actor for perspective while
+  it stands in the box. To keep the pixel art crisp, the scale is rounded to a
+  multiple of 1/16 (`15/16`, `13/16`, `5/16`...) and the sprites are resized
+  without smoothing. The change between two adjacent boxes is gradual: in the
+  outer third of a box, next to an edge shared with another box, the scale moves
+  towards the middle value between both boxes (the actor does not jump in size
+  when crossing). The farther an actor is, the coarser it is drawn: below a
+  scale of 1/3 its pixels become 2x2 blocks, so a distant actor loses
+  definition instead of looking sharper (see `pixelationRate` in `sprite.go`).
+  Hotspots, dialog positions and walking speed follow the scaled size, so actors
+  do not seem to run when they are far.
   Boxes can start disabled (`enabled = false`) and be toggled at runtime with
   `room.boxN:enable() / :disable()` — a common trick to open new areas.
 - **Objects** are interactive things. `hotspot` is the clickable area,

@@ -29,7 +29,7 @@ func NewWalkBox(id string, vertices [4]Position, scale float32) *WalkBox {
 		walkBoxID: id,
 		vertices:  verticesf,
 		enabled:   true,
-		scale:     scale,
+		scale:     quantizeScale(scale),
 	}
 
 	if !w.isConvex() {
@@ -38,9 +38,29 @@ func NewWalkBox(id string, vertices [4]Position, scale float32) *WalkBox {
 	return w
 }
 
-// Scale returns the scale factor of the WalkBox for camera zoom effects.
+// scaleSteps is the number of steps of a whole unit of scale. Scales are limited to multiples of
+// 1/scaleSteps so scaled pixel art keeps a regular look.
+const scaleSteps = 16
+
+// quantizeScale rounds s to the nearest multiple of 1/scaleSteps, with a minimum of one step.
+func quantizeScale(s float32) float32 {
+	steps := math.Round(float64(s) * scaleSteps)
+	return float32(math.Max(steps, 1)) / scaleSteps
+}
+
+// Scale returns the scale factor applied to the actors standing in the WalkBox. It is always a
+// multiple of 1/16.
 func (w *WalkBox) Scale() float32 {
 	return w.scale
+}
+
+// yRange returns the top and bottom of the WalkBox.
+func (w *WalkBox) yRange() (top, bottom float32) {
+	top, bottom = w.vertices[0].Y, w.vertices[0].Y
+	for _, v := range w.vertices {
+		top, bottom = min(top, v.Y), max(bottom, v.Y)
+	}
+	return top, bottom
 }
 
 // Draws the edges of the WalkBox.
@@ -297,6 +317,53 @@ func (wm *WalkBoxMatrix) walkBoxAt(p Positionf) (id int, included bool) {
 	}
 
 	return id, false
+}
+
+// scaleBlend is the fraction of the height of a WalkBox, measured from each edge it shares with
+// another WalkBox, where its scale blends with the scale of the neighbour.
+const scaleBlend = 1.0 / 3
+
+// ScaleAt returns the scale of an actor standing at p. It is the scale of the WalkBox at p, except
+// near the edges shared with the adjacent WalkBoxes above and below: there the scale moves
+// gradually towards the middle value between both boxes, so crossing from one box to the other
+// does not make the actor jump in size. The result is a multiple of 1/16.
+func (wm *WalkBoxMatrix) ScaleAt(p Positionf) float32 {
+	id, _ := wm.walkBoxAt(p)
+	if id == InvalidWalkBox {
+		return 1
+	}
+	wb := wm.walkBoxes[id]
+	top, bottom := wb.yRange()
+	margin := (bottom - top) * scaleBlend
+
+	// Average scale of the neighbours above and below the box.
+	var sum [2]float32
+	var count [2]int
+	for i, other := range wm.walkBoxes {
+		if i == id || !wb.isAdjacent(other) {
+			continue
+		}
+		otop, obottom := other.yRange()
+		side := 0 // above
+		if otop+obottom > top+bottom {
+			side = 1 // below
+		}
+		sum[side] += other.scale
+		count[side]++
+	}
+
+	scale := wb.scale
+	blend := func(side int, distance float32) {
+		if count[side] == 0 || distance >= margin {
+			return
+		}
+		edge := (wb.scale + sum[side]/float32(count[side])) / 2
+		t := max(distance, 0) / margin
+		scale = edge + (wb.scale-edge)*t
+	}
+	blend(0, p.Y-top)
+	blend(1, bottom-p.Y)
+	return quantizeScale(scale)
 }
 
 // closestPositionOnWalkBox returns the closest point on the walkbox at a given position.
