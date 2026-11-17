@@ -45,8 +45,7 @@ make && make run
 ```
 
 `make` (packing) is only needed again when your assets change. `make dump`
-writes `resources.dump.json`, a canonical JSON dump of the package used for
-cross-implementation validation.
+writes `resources.dump.json`, a canonical JSON dump of the package.
 
 ## Anatomy of a game
 
@@ -712,6 +711,6 @@ does.
 # Pack YAML/Lua assets into resources.idx + resources.dat
 go run ./cmd/scummgo pack -o resources ./path/to/resources
 
-# Dump a package as canonical JSON (for cross-impl validation with scummrs)
+# Dump a package as canonical JSON
 go run ./cmd/scummgo dump -o resources.dump.json resources
 ```

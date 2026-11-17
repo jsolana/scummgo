@@ -57,7 +57,7 @@ func (c *Costume) BinaryEncode(w io.Writer) (n int, err error) {
 	if err != nil {
 		return n, err
 	}
-	// Sort actions for deterministic on-disk layout (needed for cross-impl validation).
+	// Sort actions for deterministic on-disk layout.
 	actions := make([]byte, 0, len(c.anims))
 	for act := range c.anims {
 		actions = append(actions, byte(act))

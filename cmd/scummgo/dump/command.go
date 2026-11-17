@@ -10,7 +10,7 @@ import (
 
 var output string
 
-// Command dumps a ScummGo package (.idx/.dat) as canonical JSON for cross-impl validation.
+// Command dumps a ScummGo package (.idx/.dat) as canonical JSON.
 var Command = &cobra.Command{
 	Use:   "dump [package]",
 	Short: "dump a ScummGo package as JSON (omit .idx/.dat suffix)",

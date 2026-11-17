@@ -14,8 +14,6 @@ import (
 )
 
 // PackageDump is a stable, JSON-serializable description of a ScummGo package.
-// Both the Go and Rust dump tools emit this shape so dumps can be compared byte-for-byte
-// (after canonical JSON encoding).
 type PackageDump struct {
 	FormatVersion uint16             `json:"format_version"`
 	IndexMagic    string             `json:"index_magic"`
