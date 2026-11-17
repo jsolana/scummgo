@@ -3,6 +3,7 @@ package scummgo
 import (
 	"fmt"
 	"io"
+	"log"
 	"sync"
 	"time"
 
@@ -244,6 +245,10 @@ func (l *LuaInterpreter) DeclareActorType() {
 		cmd.Object = l.CheckEntity(2, ScriptEntityObject).(*Object)
 		l.runCommand(cmd).Wait()
 		return 0
+	})
+	l.DeclareEntityMethod(ScriptEntityActor, "isspeaking", func(l *LuaInterpreter) int {
+		l.PushBoolean(l.CheckEntity(1, ScriptEntityActor).(*Actor).IsSpeaking())
+		return 1
 	})
 	l.DeclareEntityMethod(ScriptEntityActor, "play", func(l *LuaInterpreter) int {
 		var cmd ActorPlay
@@ -1270,6 +1275,26 @@ func (l *LuaInterpreter) DeclareUtilityFunctions() {
 		return 0
 	})
 	l.SetGlobal("sleep")
+
+	l.PushFunction(func(l *LuaInterpreter) int {
+		millis := lua.CheckInteger(l.State, 1)
+		if !l.IsFunction(2) {
+			lua.ArgumentError(l.State, 2, "expected function")
+		}
+		l.PushValue(2)
+		id := l.RegisterCallback(2)
+
+		// The function runs like any other callback, so it must not block (no sleep or wait).
+		go func() {
+			for range time.Tick(time.Duration(millis) * time.Millisecond) {
+				if err := l.CallMethod(id, nil); err != nil {
+					log.Printf("error in periodic function: %v", err)
+				}
+			}
+		}()
+		return 0
+	})
+	l.SetGlobal("every")
 
 	l.PushFunction(func(l *LuaInterpreter) int {
 		if !l.IsFunction(1) {

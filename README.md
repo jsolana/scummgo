@@ -471,6 +471,53 @@ animation ends:
 alice:play("checkwatch"):wait()
 ```
 
+#### Background animations
+
+To make an animation happen on its own while the player does something else (for instance a
+pirate dozing off every now and then), use `every(ms, fn)` together with `actor:play` and
+`actor:isspeaking()`:
+
+- `every(ms, fn)` calls `fn` periodically in the background, starting `ms` milliseconds after
+  it is called. Call it once (for instance in the room `enter` function), or each call will
+  create one more timer.
+- `fn` runs like any other callback, so it must **not block**: do not call `sleep` or `wait`
+  inside it. That is not a limitation in practice, because `actor:play` returns immediately
+  and the animation runs by itself.
+- `actor:isspeaking()` returns `true` while the actor is talking. Check it to skip the
+  animation while somebody is speaking.
+- A talking actor stops any custom animation in progress.
+
+The period counts from each start of the animation, so it has to include the animation
+length. For a `sleep` animation of 6 seconds that should repeat after 30 seconds awake:
+
+```yaml
+# costume manifest
+- action: sleep
+  frames:
+  - row: 2
+    columns: [2, 3]      # falling asleep
+    duration: 250
+  - row: 2
+    columns: [4]         # sleeping (5 seconds)
+    duration: 5000
+  - row: 2
+    columns: [3, 2]      # waking up
+    duration: 250
+```
+
+```lua
+local SLEEP_PERIOD = 36000 -- 30 seconds awake + 6 seconds of animation
+
+function melee:enter()
+    -- ...
+    every(SLEEP_PERIOD, function()
+        if not (barrel:isspeaking() or fat:isspeaking() or tall:isspeaking()) then
+            barrel:play("sleep")
+        end
+    end)
+end
+```
+
 ## Tutorial: a tiny two-room adventure
 
 Let's build *The Secret of the Boring Office* from scratch: a hall with a
