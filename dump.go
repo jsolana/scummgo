@@ -68,13 +68,15 @@ type AudioDumpDetail struct {
 
 // CostumeDumpDetail is the dump detail for a costume resource.
 type CostumeDumpDetail struct {
-	Sprites     SpriteSheetDumpDetail `json:"sprites"`
-	Animations  []AnimationDumpDetail `json:"animations"`
+	Sprites          SpriteSheetDumpDetail `json:"sprites"`
+	Animations       []AnimationDumpDetail `json:"animations"`
+	CustomAnimations []AnimationDumpDetail `json:"custom_animations"`
 }
 
 // AnimationDumpDetail is one costume animation entry.
 type AnimationDumpDetail struct {
 	Action uint8               `json:"action"`
+	Name   string              `json:"name,omitempty"`
 	Flip   bool                `json:"flip"`
 	Frames []FrameDumpDetail   `json:"frames"`
 }
@@ -296,22 +298,47 @@ func inspectDecoded(t resourceType, decoded []byte) (string, any, error) {
 			if err := BinaryDecode(r, &act, &flip, &frameCount); err != nil {
 				return "", nil, err
 			}
-			frames := make([]FrameDumpDetail, frameCount)
-			for j := uint32(0); j < frameCount; j++ {
-				var col, row byte
-				var delay uint64
-				if err := BinaryDecode(r, &col, &row, &delay); err != nil {
-					return "", nil, err
-				}
-				frames[j] = FrameDumpDetail{Col: col, Row: row, DelayNs: delay}
+			frames, err := decodeFramesDump(r, frameCount)
+			if err != nil {
+				return "", nil, err
 			}
 			anims = append(anims, AnimationDumpDetail{Action: act, Flip: flip, Frames: frames})
 		}
-		return "costume", CostumeDumpDetail{Sprites: *sprites, Animations: anims}, nil
+		if err := BinaryDecode(r, &count); err != nil {
+			return "", nil, err
+		}
+		custom := make([]AnimationDumpDetail, 0, count)
+		for i := uint32(0); i < count; i++ {
+			var name string
+			var flip bool
+			var frameCount uint32
+			if err := BinaryDecode(r, &name, &flip, &frameCount); err != nil {
+				return "", nil, err
+			}
+			frames, err := decodeFramesDump(r, frameCount)
+			if err != nil {
+				return "", nil, err
+			}
+			custom = append(custom, AnimationDumpDetail{Name: name, Flip: flip, Frames: frames})
+		}
+		return "costume", CostumeDumpDetail{Sprites: *sprites, Animations: anims, CustomAnimations: custom}, nil
 
 	default:
 		return fmt.Sprintf("unknown(%d)", t), map[string]any{"raw_size": len(decoded)}, nil
 	}
+}
+
+func decodeFramesDump(r io.Reader, count uint32) ([]FrameDumpDetail, error) {
+	frames := make([]FrameDumpDetail, count)
+	for i := range frames {
+		var col, row byte
+		var delay uint64
+		if err := BinaryDecode(r, &col, &row, &delay); err != nil {
+			return nil, err
+		}
+		frames[i] = FrameDumpDetail{Col: col, Row: row, DelayNs: delay}
+	}
+	return frames, nil
 }
 
 func decodeSpriteSheetDump(r io.Reader) (*SpriteSheetDumpDetail, error) {

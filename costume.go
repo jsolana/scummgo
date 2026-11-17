@@ -6,8 +6,8 @@ import (
 )
 
 // CostumeAction is a value that represents an action for a costume. For predefined actions idle,
-// speak, and walk, use the CustomIdle, CustomSpeak, and CustomWalk functions respectively to refer
-// to them. For custom actions, use any custom byte value above 0x80.
+// speak, and walk, use the CostumeIdle, CostumeSpeak, and CostumeWalk functions respectively to
+// refer to them. Custom animations are identified by name instead, see WithCustomAnimation.
 type CostumeAction byte
 
 // CostumeIdle returns a costume action for the idle action in the given direction.
@@ -29,7 +29,8 @@ func CostumeWalk(dir Direction) CostumeAction {
 type Costume struct {
 	sprites *SpriteSheet
 
-	anims map[CostumeAction]*Animation
+	anims  map[CostumeAction]*Animation
+	custom map[string]*Animation
 }
 
 // NewCostume creates a new costume.
@@ -37,6 +38,7 @@ func NewCostume(sprites *SpriteSheet) *Costume {
 	return &Costume{
 		sprites: sprites,
 		anims:   make(map[CostumeAction]*Animation),
+		custom:  make(map[string]*Animation),
 	}
 }
 
@@ -46,11 +48,22 @@ func (c *Costume) WithAnimation(act CostumeAction, anim *Animation) *Costume {
 	return c
 }
 
+// WithCustomAnimation sets a custom animation identified by name.
+func (c *Costume) WithCustomAnimation(name string, anim *Animation) *Costume {
+	c.custom[name] = anim
+	return c
+}
+
 // BinaryEncode encodes the costume to a binary format. The format is as follows:
 // - sprite sheet.
 // - uint32: the number of animations.
 // - for each animation:
 //   - byte: the action.
+//   - the animation.
+//
+// - uint32: the number of custom animations.
+// - for each custom animation:
+//   - string: the name.
 //   - the animation.
 func (c *Costume) BinaryEncode(w io.Writer) (n int, err error) {
 	n, err = BinaryEncode(w, c.sprites, uint32(len(c.anims)))
@@ -70,6 +83,23 @@ func (c *Costume) BinaryEncode(w io.Writer) (n int, err error) {
 			return n, err
 		}
 	}
+	nn, err := BinaryEncode(w, uint32(len(c.custom)))
+	n += nn
+	if err != nil {
+		return n, err
+	}
+	names := make([]string, 0, len(c.custom))
+	for name := range c.custom {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		nn, err := BinaryEncode(w, name, c.custom[name])
+		n += nn
+		if err != nil {
+			return n, err
+		}
+	}
 	return n, nil
 }
 
@@ -77,6 +107,7 @@ func (c *Costume) BinaryEncode(w io.Writer) (n int, err error) {
 func (c *Costume) BinaryDecode(r io.Reader) error {
 	c.sprites = new(SpriteSheet)
 	c.anims = make(map[CostumeAction]*Animation)
+	c.custom = make(map[string]*Animation)
 
 	var count uint32
 	if err := BinaryDecode(r, c.sprites, &count); err != nil {
@@ -89,6 +120,17 @@ func (c *Costume) BinaryDecode(r io.Reader) error {
 			return err
 		}
 		c.anims[CostumeAction(act)] = anim
+	}
+	if err := BinaryDecode(r, &count); err != nil {
+		return err
+	}
+	for i := uint32(0); i < count; i++ {
+		var name string
+		anim := new(Animation)
+		if err := BinaryDecode(r, &name, anim); err != nil {
+			return err
+		}
+		c.custom[name] = anim
 	}
 	return nil
 }

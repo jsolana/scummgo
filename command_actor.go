@@ -75,6 +75,16 @@ func (cmd ActorStand) Execute(app *App, done *Promise) {
 	done.Complete()
 }
 
+// ActorPlay is a command that will make an actor play a custom costume animation once.
+type ActorPlay struct {
+	Actor *Actor
+	Name  string
+}
+
+func (cmd ActorPlay) Execute(app *App, done *Promise) {
+	done.Bind(cmd.Actor.Do(Playing(cmd.Name)))
+}
+
 // ActorWalkToPosition is a command that will make an actor walk to a given position.
 type ActorWalkToPosition struct {
 	Actor    *Actor

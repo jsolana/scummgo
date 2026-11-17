@@ -3,7 +3,6 @@ package pack
 import (
 	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -76,23 +75,16 @@ func (d *CostumeData) UnmarshalYAML(n *yaml.Node) error {
 			)
 		}
 
-		var act scummgo.CostumeAction
 		switch strings.ToLower(anim.Action) {
 		case "idle":
-			act = scummgo.CostumeIdle(dir())
+			d.Resource.WithAnimation(scummgo.CostumeIdle(dir()), a)
 		case "speak":
-			act = scummgo.CostumeSpeak(dir())
+			d.Resource.WithAnimation(scummgo.CostumeSpeak(dir()), a)
 		case "walk":
-			act = scummgo.CostumeWalk(dir())
+			d.Resource.WithAnimation(scummgo.CostumeWalk(dir()), a)
 		default:
-			code, err := strconv.Atoi(anim.Action)
-			if err != nil {
-				err := fmt.Errorf("neither a default action nor a custom action code: %w", err)
-				return fmt.Errorf("invalid action %q: %w", anim.Action, err)
-			}
-			act = scummgo.CostumeAction(code)
+			d.Resource.WithCustomAnimation(anim.Action, a)
 		}
-		d.Resource.WithAnimation(act, a)
 	}
 
 	return nil

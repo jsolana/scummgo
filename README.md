@@ -462,6 +462,15 @@ Two animation builders for object states:
 - `sequenceanim { duration = 100, row = 6, columns = {5, 6, 7} }` — a looping
   sequence of cells with a per-frame duration in ms.
 
+Actors can also play custom costume animations. Declare them in the costume
+manifest with any `action` name other than `idle`, `speak` or `walk` (no `dir`
+needed) and play them once from a script; the returned future completes when the
+animation ends:
+
+```lua
+alice:play("checkwatch"):wait()
+```
+
 ## Tutorial: a tiny two-room adventure
 
 Let's build *The Secret of the Boring Office* from scratch: a hall with a

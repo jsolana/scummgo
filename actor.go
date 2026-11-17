@@ -209,6 +209,28 @@ func Standing(dir Direction) *Action {
 	}
 }
 
+// Playing creates a new action that plays a custom costume animation once and then completes.
+func Playing(name string) *Action {
+	var anim *Animation
+	return &Action{
+		prom: NewPromise(),
+		f: func(f *Frame, a *Actor, done *Promise) {
+			if anim == nil {
+				if a.costume == nil || a.costume.custom[name] == nil {
+					done.Complete()
+					return
+				}
+				anim = a.costume.custom[name]
+				anim.Reset()
+			}
+			anim.Draw(a.costume.sprites, a.costumePos())
+			if anim.Played() {
+				done.Complete()
+			}
+		},
+	}
+}
+
 // WalkingTo creates a new action that makes an actor walk through an array of waypoints.
 func WalkingTo(w []*WayPoint, app *App) *Action {
 	return &Action{

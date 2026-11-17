@@ -245,6 +245,13 @@ func (l *LuaInterpreter) DeclareActorType() {
 		l.runCommand(cmd).Wait()
 		return 0
 	})
+	l.DeclareEntityMethod(ScriptEntityActor, "play", func(l *LuaInterpreter) int {
+		var cmd ActorPlay
+		cmd.Actor = l.CheckEntity(1, ScriptEntityActor).(*Actor)
+		cmd.Name = lua.CheckString(l.State, 2)
+		l.PushEntity(ScriptEntityFuture, l.runCommand(cmd))
+		return 1
+	})
 	l.DeclareEntityMethod(ScriptEntityActor, "walkto", func(l *LuaInterpreter) int {
 		var cmd ActorWalkToPosition
 		cmd.Actor = l.CheckEntity(1, ScriptEntityActor).(*Actor)

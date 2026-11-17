@@ -16,6 +16,7 @@ type Animation struct {
 
 	currentFrame int
 	lastFrame    time.Time
+	played       bool
 }
 
 // NewAnimation creates a new animation.
@@ -81,6 +82,18 @@ func (a *Animation) BinaryDecode(r io.Reader) error {
 	return nil
 }
 
+// Reset rewinds the animation to its first frame.
+func (a *Animation) Reset() {
+	a.currentFrame = 0
+	a.lastFrame = time.Now()
+	a.played = false
+}
+
+// Played returns true once the animation has reached its last frame and wrapped around.
+func (a *Animation) Played() bool {
+	return a.played
+}
+
 // Draw renders the animation in the viewport.
 func (a *Animation) Draw(sprites *SpriteSheet, pos Position) {
 	if a == nil {
@@ -91,6 +104,7 @@ func (a *Animation) Draw(sprites *SpriteSheet, pos Position) {
 		a.currentFrame++
 		if a.currentFrame >= len(a.frames) {
 			a.currentFrame = 0
+			a.played = true
 		}
 	}
 
