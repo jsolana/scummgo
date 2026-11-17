@@ -51,3 +51,9 @@ data:
       - row: 0
         columns: [0,1,2,3]
         duration: 100
+    - action: checkwatch # faces left
+      flip: true
+      frames:
+      - row: 3
+        columns: [0,1,2,3,3,3,2,1,0]
+        duration: 150

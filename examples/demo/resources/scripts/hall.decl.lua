@@ -4,8 +4,8 @@ hall = room {
         box0 = walkbox {
             vertices = {
                 pos {x=10, y=140},
-                pos {x=310, y=140},
-                pos {x=305, y=117},
+                pos {x=380, y=140},
+                pos {x=375, y=117},
                 pos {x=10, y=117},
             },
             scale = 1,
